@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production Rate</title>
+    <!-- Tailwind CSS CDN for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            @apply bg-gray-900 text-gray-100 flex items-center justify-center min-h-screen p-4;
+        }
+
+        /* Basic switch styling */
+        .switch {
+            @apply relative inline-flex items-center h-6 w-11 rounded-full cursor-pointer transition-colors duration-200 ease-in-out;
+            @apply bg-gray-600;
+        }
+        .switch.is-on {
+            @apply bg-indigo-600;
+        }
+        .switch-thumb {
+            @apply pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform duration-200 ease-in-out;
+            transform: translateX(2px);
+        }
+        .switch.is-on .switch-thumb {
+            transform: translateX(22px);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="max-w-3xl w-full text-center">
+        <!-- Main title and subtitle -->
+        <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-600">
+            Listen to the rate of production to understand the scale of our impact
+        </h1>
+        <p class="text-xl md:text-2xl font-medium text-gray-400 mb-8">
+            Click on each button to hear the units per minute
+        </p>
+
+        <!-- Button container -->
+        <div class="flex flex-wrap items-center justify-center gap-6 mb-6">
+            <div id="button-1" class="group flex flex-row items-center justify-between w-full md:w-[calc(50%-0.75rem)] p-5 rounded-2xl bg-gray-800 transition-colors duration-200 cursor-pointer shadow-xl transform hover:scale-105" data-rate="10">
+                <div class="flex flex-col items-center text-center flex-grow">
+                    <span class="text-2xl font-bold mb-1">Baer</span>
+                    <span class="text-lg text-gray-400">10 units per minute</span>
+                </div>
+                <div class="switch">
+                    <span class="switch-thumb"></span>
+                </div>
+            </div>
+            <div id="button-2" class="group flex flex-row items-center justify-between w-full md:w-[calc(50%-0.75rem)] p-5 rounded-2xl bg-gray-800 transition-colors duration-200 cursor-pointer shadow-xl transform hover:scale-105" data-rate="24">
+                <div class="flex flex-col items-center text-center flex-grow">
+                    <span class="text-2xl font-bold mb-1">All Headsets</span>
+                    <span class="text-lg text-gray-400">24 units per minute</span>
+                </div>
+                <div class="switch">
+                    <span class="switch-thumb"></span>
+                </div>
+            </div>
+            <div id="button-3" class="group flex flex-row items-center justify-between w-full md:w-[calc(50%-0.75rem)] p-5 rounded-2xl bg-gray-800 transition-colors duration-200 cursor-pointer shadow-xl transform hover:scale-105" data-rate="46">
+                <div class="flex flex-col items-center text-center flex-grow">
+                    <span class="text-2xl font-bold mb-1">Palau</span>
+                    <span class="text-lg text-gray-400">46 units per minute</span>
+                </div>
+                <div class="switch">
+                    <span class="switch-thumb"></span>
+                </div>
+            </div>
+            <div id="button-4" class="group flex flex-row items-center justify-between w-full md:w-[calc(50%-0.75rem)] p-5 rounded-2xl bg-gray-800 transition-colors duration-200 cursor-pointer shadow-xl transform hover:scale-105" data-rate="205">
+                <div class="flex flex-col items-center text-center flex-grow">
+                    <span class="text-2xl font-bold mb-1">All Mice</span>
+                    <span class="text-lg text-gray-400">205 units per minute</span>
+                </div>
+                <div class="switch">
+                    <span class="switch-thumb"></span>
+                </div>
+            </div>
+            <div id="button-5" class="group flex flex-row items-center justify-between w-full md:w-[calc(50%-0.75rem)] p-5 rounded-2xl bg-gray-800 transition-colors duration-200 cursor-pointer shadow-xl transform hover:scale-105" data-rate="311">
+                <div class="flex flex-col items-center text-center flex-grow">
+                    <span class="text-2xl font-bold mb-1">All Logitech Products</span>
+                    <span class="text-lg text-gray-400">311 units per minute</span>
+                </div>
+                <div class="switch">
+                    <span class="switch-thumb"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer text -->
+        <p class="text-sm text-gray-500 mt-8">Based on CY24 Distribution Data</p>
+    </div>
+
+    <script>
+        let audioContext = null;
+        let currentInterval = null;
+        let activeButton = null;
+
+        // Function to create and play a short beep sound with a visual pulse
+        function playBeep() {
+            if (!audioContext) return;
+
+            // Visual pulse effect on the active button
+            if (activeButton) {
+                // Capture the current activeButton in a constant
+                const currentButton = activeButton;
+
+                // Add the new teal background color to the button
+                currentButton.classList.add('ring-4', 'ring-[#00FDCF]');
+
+                // Remove the teal color after a short delay
+                setTimeout(() => {
+                    // Make sure the button is still the active one before removing the class
+                    if (currentButton === activeButton) {
+                        currentButton.classList.remove('ring-4', 'ring-[#00FDCF]');
+                    }
+                }, 100); // The duration of the pulse
+            }
+
+            // Create a simple oscillator
+            const oscillator = audioContext.createOscillator();
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+
+            // Create a gain node to control the volume and make a sharp sound
+            const gainNode = audioContext.createGain();
+            gainNode.gain.setValueAtTime(1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.05);
+
+            // Connect the nodes and start the sound
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.start();
+            
+            // Stop the oscillator after a short time
+            oscillator.stop(audioContext.currentTime + 0.05);
+        }
+
+        // Get all button containers
+        const buttons = document.querySelectorAll('[data-rate]');
+
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Lazily create the AudioContext on the first user gesture
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+
+                const rate = parseFloat(button.dataset.rate);
+                const isAlreadyActive = button === activeButton;
+                const switchElement = button.querySelector('.switch');
+
+                // If the same switch was clicked again, turn it off
+                if (isAlreadyActive) {
+                    clearInterval(currentInterval);
+                    button.classList.remove('ring-2', 'ring-indigo-500', 'ring-opacity-50', 'shadow-lg', 'scale-105');
+                    button.classList.remove('ring-4', 'ring-[#00FDCF]');
+                    if (switchElement) {
+                        switchElement.classList.remove('is-on');
+                    }
+                    activeButton = null;
+                    return;
+                }
+
+                // If a different switch was clicked, clear the previous interval
+                if (currentInterval) {
+                    clearInterval(currentInterval);
+                }
+                
+                if (activeButton) {
+                    // Explicitly reset the old active button's state
+                    activeButton.classList.remove('ring-2', 'ring-indigo-500', 'ring-opacity-50', 'shadow-lg', 'scale-105');
+                    activeButton.classList.remove('ring-4', 'ring-[#00FDCF]');
+                    const oldSwitchElement = activeButton.querySelector('.switch');
+                    if (oldSwitchElement) {
+                        oldSwitchElement.classList.remove('is-on');
+                    }
+                }
+
+                // Add highlight and switch on class to the new active button
+                button.classList.add('ring-2', 'ring-indigo-500', 'ring-opacity-50', 'shadow-lg', 'scale-105');
+                if (switchElement) {
+                    switchElement.classList.add('is-on');
+                }
+                activeButton = button;
+
+                // Calculate the interval in milliseconds
+                const interval = (60 / rate) * 1000;
+
+                // Start the new interval and play the first beep immediately
+                playBeep();
+                currentInterval = setInterval(playBeep, interval);
+
+            });
+        });
+
+    </script>
+</body>
+</html>
